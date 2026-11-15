@@ -28,6 +28,18 @@ Both apps share one Firebase project (Auth, Firestore, Storage). There is no sep
 
 For the release APK, add the release keystore's SHA-1 and SHA-256 the same way. Always sign shared APKs with that same keystore.
 
+### Building from the terminal
+
+```bash
+cd android && ./gradlew assembleDebug
+```
+
+The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`. If Gradle times out while downloading on your network, run `export JAVA_TOOL_OPTIONS=-Djava.net.preferIPv4Stack=true` first.
+
+### Firestore security rules
+
+[`android/firestore.rules`](android/firestore.rules) is the source of truth. Paste it into Firebase Console → Firestore → Rules → Publish.
+
 ### Firestore data the app expects
 
 - `dealers/{email-lowercase}`: `name`, `address`, `mobile`, `companyId`, `passingLocation`, `registrationLocation` (strings), and `active` (boolean, `true`).
