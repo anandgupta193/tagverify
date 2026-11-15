@@ -1,8 +1,9 @@
-import { AppstoreOutlined, BankOutlined, QrcodeOutlined, TeamOutlined } from '@ant-design/icons'
+import { AppstoreOutlined, BankOutlined, QrcodeOutlined, SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons'
 
 export const NAV_ITEMS = [
   { href: '/', label: 'Overview', icon: <AppstoreOutlined /> },
   { href: '/qr/', label: 'QR codes', icon: <QrcodeOutlined /> },
+  { href: '/certificates/', label: 'Certificates', icon: <SafetyCertificateOutlined /> },
   { href: '/dealers/', label: 'Dealers', icon: <TeamOutlined /> },
   { href: '/companies/', label: 'Companies', icon: <BankOutlined /> },
 ]
