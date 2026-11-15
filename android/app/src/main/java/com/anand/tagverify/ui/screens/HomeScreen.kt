@@ -19,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -34,13 +35,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.anand.tagverify.auth.Dealer
+import com.anand.tagverify.auth.AppUser
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    dealer: Dealer,
+    user: AppUser,
+    onScan: () -> Unit,
     onProfile: () -> Unit,
     onLogout: () -> Unit,
 ) {
@@ -62,6 +64,15 @@ fun HomeScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbar) },
+        floatingActionButton = {
+            LargeFloatingActionButton(onClick = onScan) {
+                Icon(
+                    Icons.Filled.QrCodeScanner,
+                    contentDescription = "Scan QR code",
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+        },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -72,12 +83,12 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                "Hello, ${dealer.name.ifBlank { dealer.email }}",
+                "Hello, ${user.name.ifBlank { user.email }}",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                "Company: ${dealer.companyId}",
+                "Company: ${user.companyId}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -88,7 +99,7 @@ fun HomeScreen(
                 subtitle = "Scan a vehicle tag to register or view its certificate",
                 container = MaterialTheme.colorScheme.primaryContainer,
                 onContainer = MaterialTheme.colorScheme.onPrimaryContainer,
-                onClick = { comingSoon("QR scanning") },
+                onClick = onScan,
             )
             HomeTile(
                 icon = Icons.Filled.Description,
@@ -101,7 +112,7 @@ fun HomeScreen(
             HomeTile(
                 icon = Icons.Filled.Person,
                 title = "Profile",
-                subtitle = "Your dealer details",
+                subtitle = "Your details",
                 container = MaterialTheme.colorScheme.surfaceVariant,
                 onContainer = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = onProfile,

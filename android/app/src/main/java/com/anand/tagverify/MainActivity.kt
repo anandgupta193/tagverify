@@ -9,8 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,8 +26,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.anand.tagverify.auth.AuthState
 import com.anand.tagverify.auth.AuthViewModel
-import com.anand.tagverify.auth.Dealer
+import com.anand.tagverify.auth.AppUser
 import com.anand.tagverify.auth.GoogleSignIn
+import com.anand.tagverify.scan.ScanResult
+import com.anand.tagverify.scan.ScanResultScreen
+import com.anand.tagverify.scan.ScannerScreen
 import com.anand.tagverify.ui.screens.HomeScreen
 import com.anand.tagverify.ui.screens.LoginScreen
 import com.anand.tagverify.ui.screens.ProfileScreen
@@ -52,19 +60,22 @@ fun TagVerifyApp(authViewModel: AuthViewModel = viewModel()) {
             CircularProgressIndicator()
         }
         is AuthState.SignedOut -> LoginScreen(s, authViewModel)
-        is AuthState.SignedIn -> SignedInNav(s.dealer, authViewModel)
+        is AuthState.SignedIn -> SignedInNav(s.user, authViewModel)
     }
 }
 
 @Composable
-private fun SignedInNav(dealer: Dealer, authViewModel: AuthViewModel) {
+private fun SignedInNav(user: AppUser, authViewModel: AuthViewModel) {
     val nav = rememberNavController()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Last scanned QR, kept across the scanner -> result hop and rotation.
+    var lastScan by rememberSaveable(stateSaver = scanResultSaver) { mutableStateOf<ScanResult?>(null) }
     NavHost(navController = nav, startDestination = "home") {
         composable("home") {
             HomeScreen(
-                dealer = dealer,
+                user = user,
+                onScan = { nav.navigate("scan") },
                 onProfile = { nav.navigate("profile") },
                 onLogout = {
                     scope.launch {
@@ -75,7 +86,33 @@ private fun SignedInNav(dealer: Dealer, authViewModel: AuthViewModel) {
             )
         }
         composable("profile") {
-            ProfileScreen(dealer = dealer, onBack = { nav.popBackStack() })
+            ProfileScreen(user = user, onBack = { nav.popBackStack() })
+        }
+        composable("scan") {
+            ScannerScreen(
+                onScanned = { result ->
+                    lastScan = result
+                    nav.navigate("result") { popUpTo("scan") { inclusive = true } }
+                },
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable("result") {
+            val result = lastScan
+            if (result == null) {
+                LaunchedEffect(Unit) { nav.popBackStack("home", inclusive = false) }
+            } else {
+                ScanResultScreen(
+                    result = result,
+                    onScanAgain = { nav.navigate("scan") { popUpTo("result") { inclusive = true } } },
+                    onDone = { nav.popBackStack("home", inclusive = false) },
+                )
+            }
         }
     }
 }
+
+private val scanResultSaver = listSaver<ScanResult?, String?>(
+    save = { r -> if (r == null) emptyList() else listOf(r.rawValue, r.type, r.url) },
+    restore = { l -> if (l.isEmpty()) null else ScanResult(l[0].orEmpty(), l[1].orEmpty(), l[2]) },
+)

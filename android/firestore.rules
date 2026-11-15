@@ -1,51 +1,65 @@
 rules_version = '2';
-// TagVerify MVP rules (dealer app). Admin edits happen in the Firebase console,
-// which bypasses these rules.
+// TagVerify rules for the dealer app and the admin web panel.
+// Schema and permission table: docs/DATA_MODEL.md
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function signedIn() { return request.auth != null && request.auth.token.email != null; }
     function myEmail() { return request.auth.token.email.lower(); }
-    function dealerPath() { return /databases/$(database)/documents/dealers/$(myEmail()); }
-    function isDealer() {
-      return signedIn() && exists(dealerPath()) && get(dealerPath()).data.active == true;
-    }
-    function myCompany() { return get(dealerPath()).data.companyId; }
+    function userPath() { return /databases/$(database)/documents/users/$(myEmail()); }
+    function me() { return get(userPath()).data; }
+    function isActive() { return signedIn() && exists(userPath()) && me().active == true; }
+    function isAdmin() { return isActive() && me().role == 'admin'; }
+    function isDealer() { return isActive() && me().role == 'dealer'; }
+    function myCompany() { return me().companyId; }
 
-    // A dealer can read only their own profile. Profiles are managed by admin.
-    match /dealers/{email} {
-      allow read: if signedIn() && email == myEmail();
-      allow write: if false;
+    // Everyone may read their own profile (that's how login checks access).
+    // Only admins manage users.
+    match /users/{email} {
+      allow read: if signedIn() && (email == myEmail() || isAdmin());
+      allow write: if isAdmin();
     }
 
     match /companies/{companyId} {
-      allow read: if isDealer() && companyId == myCompany();
-      allow write: if false;
+      allow read: if isAdmin() || (isDealer() && companyId == myCompany());
+      allow write: if isAdmin();
     }
 
     match /masters/{docId} {
-      allow read: if isDealer();
-      allow write: if false;
+      allow read: if isActive();
+      allow write: if isAdmin();
     }
 
-    // QR codes: readable by dealers of the same company; a dealer may only
-    // flip an unused QR of their company to certified.
+    match /counters/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /qrBatches/{batchId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Dealers see their company's QR codes and may only flip an unused one to
+    // certified (linking the certificate). Everything else is admin-only.
     match /qrCodes/{qrId} {
-      allow read: if isDealer() && resource.data.companyId == myCompany();
-      allow update: if isDealer()
+      allow read: if isAdmin() || (isDealer() && resource.data.companyId == myCompany());
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isDealer()
         && resource.data.companyId == myCompany()
         && resource.data.status == 'unused'
         && request.resource.data.status == 'certified'
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'certificateId']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'certificateId'])
+      );
     }
 
-    // Certificates: dealers read their company's; create only as themselves.
     match /certificates/{certId} {
-      allow read: if isDealer() && resource.data.companyId == myCompany();
-      allow create: if isDealer()
+      allow read: if isAdmin() || (isDealer() && resource.data.companyId == myCompany());
+      allow create: if isAdmin() || (
+        isDealer()
         && request.resource.data.companyId == myCompany()
-        && request.resource.data.dealerId == myEmail();
-      allow update, delete: if false;
+        && request.resource.data.dealerEmail == myEmail()
+      );
+      allow update, delete: if isAdmin();
     }
   }
 }

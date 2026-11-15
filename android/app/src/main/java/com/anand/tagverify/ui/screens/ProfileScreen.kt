@@ -17,11 +17,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.anand.tagverify.auth.Dealer
+import com.anand.tagverify.auth.AppUser
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(dealer: Dealer, onBack: () -> Unit) {
+fun ProfileScreen(user: AppUser, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -41,13 +41,14 @@ fun ProfileScreen(dealer: Dealer, onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
         ) {
             listOf(
-                "Name" to dealer.name,
-                "Email" to dealer.email,
-                "Mobile" to dealer.mobile,
-                "Address" to dealer.address,
-                "Company" to dealer.companyId,
-                "Passing location" to dealer.passingLocation,
-                "Registration location" to dealer.registrationLocation,
+                "Name" to user.name,
+                "Email" to user.email,
+                "Role" to user.role.name.lowercase().replaceFirstChar { it.uppercase() },
+                "Mobile" to user.mobile,
+                "Address" to user.address,
+                "Company" to user.companyId,
+                "Passing location" to user.passingLocation,
+                "Registration location" to user.registrationLocation,
             ).forEach { (label, value) ->
                 ListItem(
                     overlineContent = { Text(label) },

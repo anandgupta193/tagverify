@@ -2,6 +2,8 @@ package com.anand.tagverify.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.anand.tagverify.config.AppConfig
+import com.anand.tagverify.data.Collections
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -17,17 +19,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 sealed interface AuthState {
-    /** Checking the saved session or the dealer record. */
+    /** Checking the saved session or the user's profile. */
     data object Loading : AuthState
     data class SignedOut(val message: String? = null, val busy: Boolean = false) : AuthState
-    data class SignedIn(val dealer: Dealer) : AuthState
+    data class SignedIn(val user: AppUser) : AuthState
 }
 
 /**
- * Android version of the web app's useAuth hook: listens to Firebase auth state
- * and exposes it to the UI. On top of that, every signed-in account must have an
- * active document in dealers/{email}; anyone else is signed straight back out.
- * That check is what stops a random Gmail account from getting in via Google.
+ * Listens to Firebase auth state and exposes it to the UI. Every signed-in
+ * account must have an active users/{email} doc with a role (admin or dealer);
+ * anyone else is signed straight back out. That allow-list is what stops a
+ * random Gmail account from getting in via Google.
  */
 class AuthViewModel(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
@@ -49,7 +51,7 @@ class AuthViewModel(
             pendingMessage = null
         } else {
             _state.value = AuthState.Loading
-            verifyJob = viewModelScope.launch { verifyDealer(user) }
+            verifyJob = viewModelScope.launch { verifyUser(user) }
         }
     }
 
@@ -57,25 +59,26 @@ class AuthViewModel(
         auth.addAuthStateListener(listener)
     }
 
-    private suspend fun verifyDealer(user: FirebaseUser) {
+    private suspend fun verifyUser(user: FirebaseUser) {
         val email = user.email?.trim()?.lowercase()
         if (email.isNullOrEmpty()) {
             rejectAndSignOut("This account has no email address.")
             return
         }
         try {
-            val doc = db.collection("dealers").document(email).get().await()
+            val doc = db.collection(Collections.USERS).document(email).get().await()
+            val profile = if (doc.exists()) AppUser.from(doc) else null
             when {
-                !doc.exists() -> rejectAndSignOut(
-                    "$email is not registered as a dealer. Ask your admin to add you."
+                profile == null -> rejectAndSignOut(
+                    "You are not a dealer. Please contact the admin, ${AppConfig.ADMIN_NAME}.\n($email)"
                 )
-                doc.getBoolean("active") != true -> rejectAndSignOut(
-                    "Your dealer account is inactive. Contact your admin."
+                !profile.active -> rejectAndSignOut(
+                    "Your account is inactive. Please contact the admin, ${AppConfig.ADMIN_NAME}."
                 )
-                else -> _state.value = AuthState.SignedIn(Dealer.from(doc))
+                else -> _state.value = AuthState.SignedIn(profile)
             }
         } catch (e: Exception) {
-            rejectAndSignOut("Couldn't verify your dealer account. Check your internet and try again.")
+            rejectAndSignOut("Couldn't verify your account. Check your internet and try again.")
         }
     }
 

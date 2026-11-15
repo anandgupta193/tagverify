@@ -54,6 +54,13 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // QR scanning: CameraX preview + ML Kit barcode detection
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.mlkit.vision)
+    implementation(libs.mlkit.barcode.scanning)
+
     // Google sign-in via Credential Manager
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
