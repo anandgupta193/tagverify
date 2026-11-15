@@ -157,7 +157,7 @@ export default function QrPage() {
           </Form.Item>
           <div className="grid gap-x-4 sm:grid-cols-2">
             <Form.Item name="quantity" label="Quantity" rules={[{ required: true }]} extra="Serial numbers are assigned automatically">
-              <InputNumber min={1} max={2000} className="w-full" />
+              <InputNumber min={1} max={2000} style={{ width: "100%" }} />
             </Form.Item>
             <Form.Item name="dealerEmail" label="Give to dealer">
               <Select options={dealerOptions(formCompany)} disabled={!formCompany} />
@@ -230,7 +230,7 @@ function QrLookup({ companyName, dealerOptions }: { companyName: Record<string, 
               size="small"
               items={[
                 { label: 'QR ID', children: <span className="font-mono" style={{ fontWeight: 600 }}>{qr.id}</span> },
-                { label: 'Status', children: qr.status === 'certified' ? <Tag color="success" bordered={false}>Certified</Tag> : <Tag color="processing" bordered={false}>Unused</Tag> },
+                { label: 'Status', children: qr.status === 'certified' ? <Tag color="success" variant="filled">Certified</Tag> : <Tag color="processing" variant="filled">Unused</Tag> },
                 { label: 'Company', children: companyName[qr.companyId] ?? qr.companyId },
                 { label: 'Product', children: qr.productType },
                 { label: 'Dealer', children: <Select style={{ minWidth: 200 }} value={qr.dealerEmail ?? ''} options={dealerOptions(qr.companyId)} onChange={reassign} /> },

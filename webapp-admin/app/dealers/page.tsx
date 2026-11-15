@@ -77,7 +77,7 @@ export default function DealersPage() {
     }
   }
 
-  const status = (d: AppUser) => (d.active ? <Tag color="success" bordered={false}>Active</Tag> : <Tag bordered={false}>Inactive</Tag>)
+  const status = (d: AppUser) => (d.active ? <Tag color="success" variant="filled">Active</Tag> : <Tag variant="filled">Inactive</Tag>)
 
   return (
     <>
