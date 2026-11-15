@@ -1,5 +1,6 @@
 package com.anand.tagverify.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
@@ -43,12 +44,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.anand.tagverify.R
 import com.anand.tagverify.auth.AuthState
 import com.anand.tagverify.auth.AuthViewModel
 import com.anand.tagverify.auth.GoogleResult
@@ -95,32 +98,6 @@ fun LoginScreen(state: AuthState.SignedOut, viewModel: AuthViewModel) {
                 )
 
                 Spacer(Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = {
-                        scope.launch {
-                            when (val r = GoogleSignIn.signIn(context)) {
-                                is GoogleResult.Success -> viewModel.signInWithCredential(r.credential)
-                                is GoogleResult.Error -> viewModel.showError(r.message)
-                                GoogleResult.Cancelled -> Unit
-                            }
-                        }
-                    },
-                    enabled = !busy,
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
-                ) {
-                    Text("Continue with Google")
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    HorizontalDivider(Modifier.weight(1f))
-                    Text(
-                        "  or  ",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    HorizontalDivider(Modifier.weight(1f))
-                }
 
                 OutlinedTextField(
                     value = email,
@@ -169,6 +146,36 @@ fun LoginScreen(state: AuthState.SignedOut, viewModel: AuthViewModel) {
 
                 TextButton(onClick = { viewModel.sendPasswordReset(email) }, enabled = !busy) {
                     Text("Forgot password?")
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    HorizontalDivider(Modifier.weight(1f))
+                    Text(
+                        "  or continue with  ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    HorizontalDivider(Modifier.weight(1f))
+                }
+
+                OutlinedIconButton(
+                    onClick = {
+                        scope.launch {
+                            when (val r = GoogleSignIn.signIn(context)) {
+                                is GoogleResult.Success -> viewModel.signInWithCredential(r.credential)
+                                is GoogleResult.Error -> viewModel.showError(r.message)
+                                GoogleResult.Cancelled -> Unit
+                            }
+                        }
+                    },
+                    enabled = !busy,
+                    modifier = Modifier.size(56.dp),
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_google),
+                        contentDescription = "Sign in with Google",
+                        modifier = Modifier.size(26.dp),
+                    )
                 }
 
                 state.message?.let { msg ->
