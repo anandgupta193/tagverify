@@ -243,7 +243,7 @@ function QrLookup({ companyName, dealerOptions }: { companyName: Record<string, 
                 { label: 'Public link', children: <a href={qrUrlFor(qr.id)} target="_blank" rel="noreferrer" className="break-all">{qrUrlFor(qr.id)}</a> },
               ]}
             />
-            <Button type="primary" icon={<PrinterOutlined />} className="mt-4" onClick={reprint}>Reprint sticker</Button>
+            <Button type="primary" icon={<PrinterOutlined />} style={{ marginTop: 16 }} onClick={reprint}>Reprint sticker</Button>
           </div>
         </div>
       )}

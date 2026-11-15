@@ -89,7 +89,8 @@ export default function SignInPage() {
             ))}
           </div>
 
-          {error && <Alert type="error" showIcon title={error} className="mb-4" style={{ borderRadius: 12 }} />}
+          {/* Inline spacing: antd's reset beats Tailwind margin utilities on its components */}
+          {error && <Alert type="error" showIcon title={error} style={{ borderRadius: 12, marginBottom: 16 }} />}
 
           <Button
             type="primary"
@@ -104,22 +105,24 @@ export default function SignInPage() {
           </Button>
 
           {showEmail ? (
-            <Form layout="vertical" className="mt-5 fade-up" requiredMark={false} onFinish={(v) => signInWithEmail(v.email, v.password)}>
+            <Form layout="vertical" className="fade-up" style={{ marginTop: 24 }} requiredMark={false} onFinish={(v) => signInWithEmail(v.email, v.password)}>
               <Form.Item name="email" label="Email" rules={[{ required: true, type: 'email' }]}>
                 <Input autoComplete="username" />
               </Form.Item>
               <Form.Item name="password" label="Password" rules={[{ required: true }]}>
                 <Input.Password autoComplete="current-password" />
               </Form.Item>
-              <Button htmlType="submit" block loading={signingIn}>Sign in with email</Button>
+              <Button htmlType="submit" block size="large" loading={signingIn} style={{ height: 44, borderRadius: 12, fontWeight: 600, marginTop: 4 }}>
+                Sign in with email
+              </Button>
             </Form>
           ) : (
-            <Button type="link" block className="mt-3" onClick={() => setShowEmail(true)}>
+            <Button type="link" block style={{ marginTop: 12 }} onClick={() => setShowEmail(true)}>
               Use email and password instead
             </Button>
           )}
 
-          <Typography.Text type="secondary" className="block text-center mt-4" style={{ fontSize: 11 }}>
+          <Typography.Text type="secondary" className="block text-center" style={{ fontSize: 11, marginTop: 16 }}>
             Only accounts with the admin role can sign in
           </Typography.Text>
         </div>

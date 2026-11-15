@@ -28,7 +28,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FlashlightOff
 import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.NoPhotography
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +92,7 @@ fun ScannerScreen(onScanned: (ScanResult) -> Unit, onBack: () -> Unit) {
         if (!hasPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
+    var showManual by remember { mutableStateOf(false) }
     var torchOn by remember { mutableStateOf(false) }
     var hasTorch by remember { mutableStateOf(false) }
     val controller = remember { LifecycleCameraController(context) }
@@ -100,6 +108,9 @@ fun ScannerScreen(onScanned: (ScanResult) -> Unit, onBack: () -> Unit) {
                     }
                 },
                 actions = {
+                    IconButton(onClick = { showManual = true }) {
+                        Icon(Icons.Filled.Keyboard, contentDescription = "Enter code manually")
+                    }
                     if (hasPermission && hasTorch) {
                         IconButton(onClick = {
                             torchOn = !torchOn
@@ -132,7 +143,7 @@ fun ScannerScreen(onScanned: (ScanResult) -> Unit, onBack: () -> Unit) {
                     onScanned = onScanned,
                     onTorchAvailable = { hasTorch = it },
                 )
-                ScanOverlay()
+                ScanOverlay(onManual = { showManual = true })
             } else {
                 PermissionMessage(
                     deniedAfterAsking = askedOnce,
@@ -149,6 +160,60 @@ fun ScannerScreen(onScanned: (ScanResult) -> Unit, onBack: () -> Unit) {
             }
         }
     }
+
+    if (showManual) {
+        ManualCodeDialog(
+            onDismiss = { showManual = false },
+            onSubmit = { code ->
+                showManual = false
+                onScanned(ScanResult(rawValue = code, type = "Typed"))
+            },
+        )
+    }
+}
+
+/** "TV-000005", "tv000005" or just "5" → "TV-000005". */
+internal fun normaliseTypedCode(input: String): String {
+    val t = input.trim().uppercase()
+    val digits = t.removePrefix("TV").trimStart('-', ' ')
+    return if (digits.isNotEmpty() && digits.all { it.isDigit() }) "TV-" + digits.padStart(6, '0') else t
+}
+
+/** For torn stickers or a camera that can't focus: type the serial printed under the QR. */
+@Composable
+private fun ManualCodeDialog(onDismiss: () -> Unit, onSubmit: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    val code = normaliseTypedCode(text)
+    val valid = Regex("^TV-\\d{6,}$").matches(code)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter QR code") },
+        text = {
+            Column {
+                Text(
+                    "Type the serial printed under the QR, e.g. TV-000205 or just 205.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.take(20) },
+                    singleLine = true,
+                    label = { Text("QR serial") },
+                    supportingText = { if (valid && code != text.trim().uppercase()) Text(code) },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Characters,
+                        imeAction = ImeAction.Done,
+                    ),
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onSubmit(code) }, enabled = valid) { Text("Continue") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 @Composable
@@ -206,24 +271,31 @@ private fun CameraPreview(
 
 /** A square frame and hint so dealers know where to point the camera. */
 @Composable
-private fun ScanOverlay() {
+private fun ScanOverlay(onManual: () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Box(
             Modifier
                 .size(260.dp)
                 .border(BorderStroke(3.dp, Color.White), RoundedCornerShape(24.dp))
         )
-        Text(
-            "Point the camera at a QR code",
-            color = Color.White,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 48.dp)
-                .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
-                .padding(horizontal = 20.dp, vertical = 10.dp),
-        )
+        Column(
+            Modifier.align(Alignment.BottomCenter).padding(bottom = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                "Point the camera at a QR code",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            TextButton(onClick = onManual) {
+                Text("Sticker torn? Enter code manually", color = Color.White)
+            }
+        }
     }
 }
 
