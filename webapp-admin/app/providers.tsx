@@ -53,6 +53,7 @@ const AuthContext = createContext<AuthState>({
   user: null,
   profile: null,
   loading: true,
+  signingIn: false,
   error: null,
   signInWithGoogle: async () => {},
   signInWithEmail: async () => {},

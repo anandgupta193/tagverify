@@ -25,7 +25,7 @@ function GoogleIcon() {
 }
 
 export default function SignInPage() {
-  const { loading, error, signInWithGoogle, signInWithEmail } = useAuthContext()
+  const { signingIn, error, signInWithGoogle, signInWithEmail } = useAuthContext()
   const { token } = theme.useToken()
   const [showEmail, setShowEmail] = useState(false)
 
@@ -94,7 +94,7 @@ export default function SignInPage() {
           <Button
             type="primary"
             size="large"
-            loading={loading}
+            loading={signingIn}
             onClick={signInWithGoogle}
             className="w-full"
             icon={<GoogleIcon />}
@@ -111,7 +111,7 @@ export default function SignInPage() {
               <Form.Item name="password" label="Password" rules={[{ required: true }]}>
                 <Input.Password autoComplete="current-password" />
               </Form.Item>
-              <Button htmlType="submit" block loading={loading}>Sign in with email</Button>
+              <Button htmlType="submit" block loading={signingIn}>Sign in with email</Button>
             </Form>
           ) : (
             <Button type="link" block className="mt-3" onClick={() => setShowEmail(true)}>
