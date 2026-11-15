@@ -52,6 +52,12 @@ service cloud.firestore {
       );
     }
 
+    // Public page behind every QR (no personal data): anyone can read.
+    match /publicCertificates/{qrId} {
+      allow read: if true;
+      allow write: if isAdmin() || isDealer();
+    }
+
     match /certificates/{certId} {
       allow read: if isAdmin() || (isDealer() && resource.data.companyId == myCompany());
       allow create: if isAdmin() || (

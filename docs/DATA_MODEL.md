@@ -70,6 +70,15 @@ Created by a dealer after scanning an `unused` QR and filling in the form.
 | `pdfUrl` | string |
 | `createdAt` | timestamp |
 
+### `publicCertificates/{qrId}`
+The **public** view shown when anyone scans a sticker (`/c/{qrId}` on the web app). It's readable by everyone, so it holds **no personal data**. It's written when a QR is certified.
+
+| Field | Type |
+|---|---|
+| `qrId`, `companyName`, `productType` | string |
+| `pdfUrl` | string |
+| `certifiedAt` | timestamp |
+
 ### `counters/qrSerial`
 `{ next: number }`. The admin panel reads and increments it in a transaction when generating a batch, so serials never repeat.
 
