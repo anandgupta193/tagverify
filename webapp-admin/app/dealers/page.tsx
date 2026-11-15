@@ -6,6 +6,7 @@ import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { FormSheet, PageHeader, ResponsiveList, Surface, errorText } from '@/components/ui'
 import { useActionParam } from '@/hooks/useActionParam'
 import { useAdminEmail } from '@/hooks/useAdminEmail'
+import { useRtos } from '@/constants/rtos'
 import type { AppUser, Company } from '@/lib/schema'
 import { listCompanies } from '@/services/companies'
 import { addDealer, listDealers, setUserActive, type NewDealer } from '@/services/users'
@@ -24,6 +25,14 @@ export default function DealersPage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [form] = Form.useForm<NewDealer>()
+  const rtos = useRtos()
+  // Same RTO list as the dealer app's form ("CG04 - RTO/ATS Raipur"), searchable by code or city.
+  const rtoSelect = {
+    placeholder: 'Select RTO',
+    allowClear: true,
+    showSearch: { optionFilterProp: 'label' },
+    options: rtos.map((r) => ({ value: r.label, label: r.label })),
+  } as const
 
   const companyName = useMemo(() => Object.fromEntries(companies.map((c) => [c.id, c.name])), [companies])
   const load = () =>
@@ -158,10 +167,10 @@ export default function DealersPage() {
               <Input />
             </Form.Item>
             <Form.Item name="passingLocation" label="Passing location">
-              <Input />
+              <Select {...rtoSelect} />
             </Form.Item>
             <Form.Item name="registrationLocation" label="Registration location">
-              <Input />
+              <Select {...rtoSelect} />
             </Form.Item>
           </div>
           <p className="overline" style={{ color: token.colorTextSecondary, margin: '4px 0 12px' }}>Printed on certificates</p>
@@ -173,8 +182,8 @@ export default function DealersPage() {
               <Input inputMode="numeric" maxLength={12} />
             </Form.Item>
           </div>
-          <Form.Item name="rtoLocation" label="RTO/ATS location" extra="e.g. CG04-RTO/ATS RAIPUR">
-            <Input autoCapitalize="characters" />
+          <Form.Item name="rtoLocation" label="RTO/ATS location">
+            <Select {...rtoSelect} />
           </Form.Item>
           <Form.Item name="password" label="Password (optional)" rules={[{ min: 6, message: 'At least 6 characters' }]} extra="Set one to allow email login. Leave empty for Google-only.">
             <Input.Password autoComplete="new-password" />
