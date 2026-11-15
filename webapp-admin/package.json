@@ -1,30 +1,34 @@
 {
   "name": "tagverify-admin",
+  "version": "0.2.0",
   "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "dev": "next dev --port 5173",
+    "build": "next build",
+    "typecheck": "tsc --noEmit",
+    "deploy": "next build && firebase deploy --only hosting"
   },
   "dependencies": {
+    "@ant-design/icons": "6.3.4",
+    "@ant-design/nextjs-registry": "1.3.0",
+    "antd": "6.7.0",
     "firebase": "13.3.0",
     "jspdf": "4.2.1",
+    "next": "16.4.6",
     "qrcode": "1.5.4",
     "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "react-router-dom": "7.18.5"
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "4.3.5",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "24.10.1",
     "@types/qrcode": "1.5.6",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@vitejs/plugin-react": "6.3.0",
     "tailwindcss": "4.3.5",
-    "typescript": "5.9.3",
-    "vite": "8.3.8"
+    "typescript": "5.9.3"
   }
 }
