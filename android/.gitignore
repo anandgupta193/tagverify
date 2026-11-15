@@ -1,0 +1,18 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+# Never commit signing keys
+*.jks
+*.keystore
+keystore.properties
+
+# Firebase config: per machine, never committed to this public repo
+google-services.json
