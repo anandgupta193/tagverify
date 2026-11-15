@@ -21,6 +21,11 @@ export interface NewDealer {
   companyId: string
   passingLocation: string
   registrationLocation: string
+  gstin: string
+  /** Full Aadhaar as typed; only the last 4 digits are stored. */
+  aadhaar: string
+  /** e.g. "CG04-RTO/ATS RAIPUR" — printed on certificates. */
+  rtoLocation: string
   /** Optional: also create an email/password login. Google login works without it. */
   password: string
 }
@@ -60,6 +65,9 @@ export async function addDealer(input: NewDealer, adminEmail: string) {
     address: input.address.trim(),
     passingLocation: input.passingLocation.trim(),
     registrationLocation: input.registrationLocation.trim(),
+    gstin: input.gstin.trim().toUpperCase(),
+    aadhaarLast4: input.aadhaar.replace(/\D/g, '').slice(-4),
+    rtoLocation: input.rtoLocation.trim().toUpperCase(),
     createdAt: serverTimestamp(),
     createdBy: adminEmail,
   })

@@ -6,12 +6,14 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
+import com.anand.tagverify.auth.AppUser
 import com.anand.tagverify.fitment.FitmentForm
 import com.anand.tagverify.fitment.FitmentLocation
 import com.anand.tagverify.fitment.PhotoSlot
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import kotlinx.coroutines.Dispatchers
@@ -43,8 +45,7 @@ object CertificateRepository {
         qr: QrContext,
         form: FitmentForm,
         location: FitmentLocation,
-        dealerEmail: String,
-        dealerName: String,
+        dealer: AppUser,
         onProgress: (Float) -> Unit,
         db: FirebaseFirestore = FirebaseFirestore.getInstance(),
         storage: FirebaseStorage = FirebaseStorage.getInstance(),
@@ -78,6 +79,25 @@ object CertificateRepository {
         )
         val generatedAt = mapOf("address" to location.address, "lat" to location.lat, "lng" to location.lng)
 
+        // Where the dealer was when submitting — kept for future geofencing
+        // (e.g. a dealer allowed only around Korba). GeoPoint enables geo queries.
+        val dealerLocation = mapOf(
+            "geo" to GeoPoint(location.lat, location.lng),
+            "lat" to location.lat,
+            "lng" to location.lng,
+            "accuracyM" to location.accuracyM.toDouble(),
+            "address" to location.address,
+            "capturedAt" to Timestamp(Date(location.capturedAt)),
+        )
+
+        // Printed in the "Dealer details" block of the certificate.
+        val dealerPublic = mapOf(
+            "name" to dealer.name,
+            "gstin" to dealer.gstin,
+            "aadhaarMasked" to if (dealer.aadhaarLast4.isNotBlank()) "XXXXXXXX${dealer.aadhaarLast4}" else "",
+            "rtoLocation" to dealer.rtoLocation,
+        )
+
         db.batch().apply {
             set(
                 certRef,
@@ -89,8 +109,11 @@ object CertificateRepository {
                     "companyName" to qr.companyName,
                     "state" to qr.state,
                     "productType" to qr.productType,
-                    "dealerEmail" to dealerEmail,
-                    "dealerName" to dealerName,
+                    "quantity" to qr.quantity,
+                    "dealerEmail" to dealer.email,
+                    "dealerName" to dealer.name,
+                    "dealer" to dealerPublic,
+                    "dealerLocation" to dealerLocation,
                     "vehicle" to vehicle,
                     "owner" to mapOf("name" to form.ownerName.trim(), "mobile" to form.ownerMobile),
                     "generatedAt" to generatedAt,
@@ -107,7 +130,8 @@ object CertificateRepository {
                 db.collection(Collections.QR_CODES).document(qr.qrId),
                 mapOf("status" to "certified", "certificateId" to certRef.id),
             )
-            // Public view behind the sticker URL — owner mobile is masked.
+            // Public view behind the sticker URL = the installation certificate
+            // page (same fields as the sample certificate).
             set(
                 db.collection(Collections.PUBLIC_CERTIFICATES).document(qr.qrId),
                 mapOf(
@@ -117,11 +141,13 @@ object CertificateRepository {
                     "companyName" to qr.companyName,
                     "state" to qr.state,
                     "productType" to qr.productType,
+                    "quantity" to qr.quantity,
                     "copNumber" to qr.copNumber,
                     "copValidity" to qr.copValidity,
                     "vehicle" to vehicle,
                     "ownerName" to form.ownerName.trim(),
-                    "ownerMobileMasked" to "******" + form.ownerMobile.takeLast(4),
+                    "ownerMobile" to form.ownerMobile,
+                    "dealer" to dealerPublic,
                     "generatedAt" to generatedAt,
                     "imageUrls" to urls,
                     "certifiedAt" to now,

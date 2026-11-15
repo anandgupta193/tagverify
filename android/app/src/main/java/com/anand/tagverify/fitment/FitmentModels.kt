@@ -15,6 +15,10 @@ data class FitmentLocation(
     val lat: Double,
     val lng: Double,
     val address: String,
+    /** GPS accuracy radius in metres (for future geofencing). */
+    val accuracyM: Float = 0f,
+    /** When the fix was taken (epoch ms). */
+    val capturedAt: Long = System.currentTimeMillis(),
 ) {
     /** "Korba, Chhattisgarh, 495450 | 22.40455, 82.68012" */
     val display: String get() = "$address | ${"%.5f".format(lat)}, ${"%.5f".format(lng)}"

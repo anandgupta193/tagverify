@@ -12,6 +12,8 @@ export interface NewBatch {
   companyId: string
   productType: string
   quantity: number
+  /** Printed on the certificate, e.g. "Set of 2". */
+  unitQuantity: string
   dealerEmail: string
 }
 
@@ -39,6 +41,7 @@ export async function generateBatch(input: NewBatch, adminEmail: string): Promis
     companyId: input.companyId,
     productType: input.productType.trim(),
     quantity,
+    unitQuantity: input.unitQuantity.trim() || 'Set of 2',
     fromSerial,
     toSerial,
     dealerEmail: input.dealerEmail || '',
@@ -54,6 +57,7 @@ export async function generateBatch(input: NewBatch, adminEmail: string): Promis
         serial,
         companyId: batchData.companyId,
         productType: batchData.productType,
+        quantity: batchData.unitQuantity,
         batchId: batchRef.id,
         dealerEmail: batchData.dealerEmail,
         status: 'unused',

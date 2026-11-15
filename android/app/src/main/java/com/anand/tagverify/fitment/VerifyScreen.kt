@@ -58,8 +58,7 @@ import com.anand.tagverify.ui.theme.Palette
 @Composable
 fun VerifyScreen(
     viewModel: FitmentViewModel,
-    dealerEmail: String,
-    dealerName: String,
+    dealer: com.anand.tagverify.auth.AppUser,
     onEdit: () -> Unit,
     onDone: () -> Unit,
 ) {
@@ -127,7 +126,7 @@ fun VerifyScreen(
                             Text("Edit details")
                         }
                         Button(
-                            onClick = { viewModel.clearSubmitError(); viewModel.generate(dealerEmail, dealerName) },
+                            onClick = { viewModel.clearSubmitError(); viewModel.generate(dealer) },
                             enabled = s.confirmed && uploading == null,
                             shape = MaterialTheme.shapes.small,
                             colors = ButtonDefaults.buttonColors(containerColor = colors.primary),
@@ -243,7 +242,18 @@ private fun CertificateDone(qrId: String, certificateNo: String, vehicleNumber: 
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(24.dp))
-            Button(onClick = onDone, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("Back to home") }
+            val context = androidx.compose.ui.platform.LocalContext.current
+            Button(
+                onClick = {
+                    runCatching {
+                        context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(com.anand.tagverify.data.QrRepository.publicUrl(qrId))))
+                    }
+                },
+                shape = MaterialTheme.shapes.small,
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+            ) { Text("View certificate") }
+            Spacer(Modifier.height(10.dp))
+            OutlinedButton(onClick = onDone, shape = MaterialTheme.shapes.small, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("Back to home") }
         }
     }
 }

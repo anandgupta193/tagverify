@@ -15,6 +15,8 @@ data class QrContext(
     val productType: String,
     val copNumber: String,
     val copValidity: com.google.firebase.Timestamp?,
+    /** Printed as "Quantity" on the certificate, e.g. "Set of 2". */
+    val quantity: String = "Set of 2",
 )
 
 sealed interface QrLookup {
@@ -66,6 +68,7 @@ object QrRepository {
                     productType = qr.getString("productType").orEmpty(),
                     copNumber = company.getString("copNumber").orEmpty(),
                     copValidity = company.getTimestamp("copValidity"),
+                    quantity = qr.getString("quantity")?.ifBlank { null } ?: "Set of 2",
                 )
             )
         } catch (e: FirebaseFirestoreException) {

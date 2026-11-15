@@ -26,6 +26,10 @@ data class AppUser(
     val address: String = "",
     val passingLocation: String = "",
     val registrationLocation: String = "",
+    val gstin: String = "",
+    val aadhaarLast4: String = "",
+    /** e.g. "CG04-RTO/ATS RAIPUR" — printed on certificates. */
+    val rtoLocation: String = "",
 ) {
     companion object {
         /** Returns null when the doc has no valid role. */
@@ -41,6 +45,9 @@ data class AppUser(
                 address = doc.getString(UserFields.ADDRESS).orEmpty(),
                 passingLocation = doc.getString(UserFields.PASSING_LOCATION).orEmpty(),
                 registrationLocation = doc.getString(UserFields.REGISTRATION_LOCATION).orEmpty(),
+                gstin = doc.getString(UserFields.GSTIN).orEmpty(),
+                aadhaarLast4 = doc.getString(UserFields.AADHAAR_LAST4).orEmpty(),
+                rtoLocation = doc.getString(UserFields.RTO_LOCATION).orEmpty(),
             )
         }
     }

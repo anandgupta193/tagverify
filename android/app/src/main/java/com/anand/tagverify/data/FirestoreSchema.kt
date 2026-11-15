@@ -25,4 +25,7 @@ object UserFields {
     const val ADDRESS = "address"
     const val PASSING_LOCATION = "passingLocation"
     const val REGISTRATION_LOCATION = "registrationLocation"
+    const val GSTIN = "gstin"
+    const val AADHAAR_LAST4 = "aadhaarLast4"
+    const val RTO_LOCATION = "rtoLocation"
 }

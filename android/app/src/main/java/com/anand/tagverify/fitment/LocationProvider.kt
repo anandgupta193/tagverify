@@ -33,7 +33,7 @@ object LocationProvider {
             client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token).await()
         }.getOrNull() ?: runCatching { client.lastLocation.await() }.getOrNull() ?: return null
         val address = reverseGeocode(context, loc.latitude, loc.longitude)
-        return FitmentLocation(loc.latitude, loc.longitude, address ?: "Unknown area")
+        return FitmentLocation(loc.latitude, loc.longitude, address ?: "Unknown area", accuracyM = loc.accuracy, capturedAt = loc.time)
     }
 
     /** "Korba, Chhattisgarh, 495450" or null when the geocoder isn't available. */

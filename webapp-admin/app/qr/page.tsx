@@ -63,10 +63,10 @@ export default function QrPage() {
     }
   }
 
-  const onGenerate = async (v: { companyId: string; productType: string; quantity: number; dealerEmail?: string }) => {
+  const onGenerate = async (v: { companyId: string; productType: string; quantity: number; unitQuantity?: string; dealerEmail?: string }) => {
     setBusy('generate')
     try {
-      const b = await generateBatch({ ...v, dealerEmail: v.dealerEmail ?? '' }, admin)
+      const b = await generateBatch({ ...v, unitQuantity: v.unitQuantity ?? 'Set of 2', dealerEmail: v.dealerEmail ?? '' }, admin)
       message.success(`Created ${b.quantity} QR codes (${range(b)})`)
       setOpen(false)
       form.resetFields()
@@ -148,13 +148,18 @@ export default function QrPage() {
       <QrLookup companyName={companyName} dealerOptions={dealerOptions} />
 
       <FormSheet open={open} title="Generate QR batch" onClose={() => setOpen(false)}>
-        <Form form={form} layout="vertical" requiredMark={false} onFinish={onGenerate} initialValues={{ quantity: 100, dealerEmail: '' }}>
+        <Form form={form} layout="vertical" requiredMark={false} onFinish={onGenerate} initialValues={{ quantity: 100, unitQuantity: 'Set of 2', dealerEmail: '' }}>
           <Form.Item name="companyId" label="Company" rules={[{ required: true, message: 'Choose a company' }]}>
             <Select placeholder="Select a company" options={companies.map((c) => ({ value: c.id, label: c.name }))} onChange={() => form.setFieldValue('dealerEmail', '')} />
           </Form.Item>
-          <Form.Item name="productType" label="Product type" rules={[{ required: true }]}>
-            <Input placeholder="e.g. Radium tape 50 mm" />
-          </Form.Item>
+          <div className="grid gap-x-4 sm:grid-cols-2">
+            <Form.Item name="productType" label="Product type" rules={[{ required: true }]}>
+              <Input placeholder="e.g. C3, CT" />
+            </Form.Item>
+            <Form.Item name="unitQuantity" label="Quantity per sticker" extra="Printed on the certificate">
+              <Input placeholder="Set of 2" />
+            </Form.Item>
+          </div>
           <div className="grid gap-x-4 sm:grid-cols-2">
             <Form.Item name="quantity" label="Quantity" rules={[{ required: true }]} extra="Serial numbers are assigned automatically">
               <InputNumber min={1} max={2000} style={{ width: "100%" }} />

@@ -53,6 +53,7 @@ export default function DealersPage() {
         {
           name: v.name, email: v.email, companyId: v.companyId, mobile: v.mobile ?? '', address: v.address ?? '',
           passingLocation: v.passingLocation ?? '', registrationLocation: v.registrationLocation ?? '', password: v.password ?? '',
+          gstin: v.gstin ?? '', aadhaar: v.aadhaar ?? '', rtoLocation: v.rtoLocation ?? '',
         },
         admin,
       )
@@ -163,6 +164,18 @@ export default function DealersPage() {
               <Input />
             </Form.Item>
           </div>
+          <p className="overline" style={{ color: token.colorTextSecondary, margin: '4px 0 12px' }}>Printed on certificates</p>
+          <div className="grid gap-x-4 sm:grid-cols-2">
+            <Form.Item name="gstin" label="GSTIN" rules={[{ pattern: /^[0-9A-Za-z]{15}$/, message: '15-character GSTIN' }]}>
+              <Input placeholder="22AZLPA3712F1Z0" autoCapitalize="characters" />
+            </Form.Item>
+            <Form.Item name="aadhaar" label="Aadhaar number" rules={[{ pattern: /^\d{12}$/, message: '12 digits' }]} extra="Only the last 4 digits are saved">
+              <Input inputMode="numeric" maxLength={12} />
+            </Form.Item>
+          </div>
+          <Form.Item name="rtoLocation" label="RTO/ATS location" extra="e.g. CG04-RTO/ATS RAIPUR">
+            <Input autoCapitalize="characters" />
+          </Form.Item>
           <Form.Item name="password" label="Password (optional)" rules={[{ min: 6, message: 'At least 6 characters' }]} extra="Set one to allow email login. Leave empty for Google-only.">
             <Input.Password autoComplete="new-password" />
           </Form.Item>

@@ -136,3 +136,24 @@ body {
     overscroll-behavior: contain;
   }
 }
+
+/* ─── Certificate printing (Download PDF = browser print) ───────────── */
+@page {
+  size: A4;
+  margin: 8mm;
+}
+@media print {
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .certificate {
+    max-width: none !important;
+    box-shadow: none !important;
+  }
+  .certificate figure,
+  .certificate section {
+    break-inside: avoid;
+  }
+}

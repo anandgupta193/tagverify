@@ -89,7 +89,7 @@ class FitmentViewModel(app: Application) : AndroidViewModel(app) {
         return ok
     }
 
-    fun generate(dealerEmail: String, dealerName: String) {
+    fun generate(dealer: com.anand.tagverify.auth.AppUser) {
         val s = _state.value
         val qr = s.qr ?: return
         val loc = s.locationValue ?: return
@@ -102,8 +102,7 @@ class FitmentViewModel(app: Application) : AndroidViewModel(app) {
                     qr = qr,
                     form = s.form,
                     location = loc,
-                    dealerEmail = dealerEmail,
-                    dealerName = dealerName,
+                    dealer = dealer,
                     onProgress = { p -> _state.update { it.copy(submit = SubmitStatus.Uploading(p)) } },
                 )
                 _state.update { it.copy(submit = SubmitStatus.Done(certNo)) }

@@ -18,6 +18,9 @@ Everyone who can sign in. A user who has no doc here, or whose doc has `active: 
 | `companyId` | string | dealers only: the company whose QR codes they can certify |
 | `mobile`, `address` | string | optional |
 | `passingLocation`, `registrationLocation` | string | dealers only, optional |
+| `gstin` | string | dealers; printed on certificates |
+| `aadhaarLast4` | string | dealers; **only the last 4 digits are stored**, printed as `XXXXXXXX1967` |
+| `rtoLocation` | string | dealers; e.g. `CG04-RTO/ATS RAIPUR`, printed on certificates |
 | `createdAt` | timestamp | |
 | `createdBy` | string | admin's email |
 
@@ -66,6 +69,9 @@ Created by a dealer (or admin) after scanning an `unused` QR and submitting the 
 | `certificateNo` | string, e.g. `CG2611150000005K7QX` (state + yyMMdd + serial + random) |
 | `qrId`, `qrSerial`, `companyId`, `companyName`, `state`, `productType` | |
 | `dealerEmail`, `dealerName` | string |
+| `dealer` | map: name, gstin, aadhaarMasked, rtoLocation (as printed) |
+| `dealerLocation` | map: **geo (GeoPoint)**, lat, lng, accuracyM, address, capturedAt. The dealer's GPS position when submitting, **kept for future geofencing** (e.g. a dealer allowed only around Korba) |
+| `quantity` | string, e.g. "Set of 2" (from the QR batch) |
 | `vehicle` | map: make, category, fuelType, passingRto, registrationRto, series, vehicleNumber (regRto + series), mfgYear, chassisNo (5 characters), engineNo (5 characters) |
 | `owner` | map: name, mobile |
 | `generatedAt` | map: address, lat, lng (GPS, mandatory) |
@@ -78,14 +84,16 @@ Created by a dealer (or admin) after scanning an `unused` QR and submitting the 
 Photos are stored at `certificates/{qrId}/{slot}.jpg` in Firebase Storage (rules: `android/storage.rules`). Each is compressed to at most 1600 px, JPEG 80%.
 
 ### `publicCertificates/{qrId}`
-The **public** view shown when anyone scans a sticker (`/c/{qrId}` on the web app). Everyone can read it, so the owner's mobile number is masked.
+The **public** view shown when anyone scans a sticker (`/c/{qrId}` on the web app). Everyone can read it. It holds exactly what the printed installation certificate shows (see `docs/DEALER_FLOW.md`).
 
 | Field | Type |
 |---|---|
 | `qrId`, `qrSerial`, `certificateNo`, `companyName`, `state`, `productType` | |
 | `copNumber`, `copValidity` | |
 | `vehicle` | same map as on the certificate |
-| `ownerName`, `ownerMobileMasked` (`******0809`) | string |
+| `ownerName`, `ownerMobile` | string (shown on the certificate, as in the sample) |
+| `dealer` | map: name, gstin, aadhaarMasked, rtoLocation |
+| `quantity` | string |
 | `generatedAt` | map: address, lat, lng |
 | `imageUrls` | map of the 4 photo URLs |
 | `certifiedAt`, `validFrom`, `validTill` | timestamp |

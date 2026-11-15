@@ -130,8 +130,7 @@ private fun SignedInNav(user: AppUser, authViewModel: AuthViewModel) {
         composable("verify") {
             VerifyScreen(
                 viewModel = fitmentViewModel,
-                dealerEmail = user.email,
-                dealerName = user.name,
+                dealer = user,
                 onEdit = { nav.popBackStack() },
                 onDone = { nav.popBackStack("home", inclusive = false) },
             )
