@@ -125,7 +125,13 @@ export function FormSheet({ open, title, onClose, children }: { open: boolean; t
       placement="bottom"
       size="auto"
       destroyOnHidden
-      styles={{ wrapper: { height: 'auto', maxHeight: '92vh' }, body: { paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' } }}
+      // Cap the panel itself (not just the wrapper) so a long form scrolls inside
+      // the sheet and its submit button stays reachable on phones.
+      styles={{
+        wrapper: { height: 'auto', maxHeight: '92dvh' },
+        section: { maxHeight: '92dvh' },
+        body: { overflowY: 'auto', minHeight: 0, overscrollBehavior: 'contain', paddingBottom: 'calc(24px + env(safe-area-inset-bottom))' },
+      }}
       rootClassName="tv-sheet"
     >
       {children}
