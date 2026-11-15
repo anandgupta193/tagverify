@@ -12,6 +12,9 @@ credentials = "1.6.0"
 googleid = "1.2.1"
 coroutinesPlayServices = "1.10.2"
 camerax = "1.6.2"
+playServicesLocation = "21.4.0"
+coil = "3.6.3"
+exifinterface = "1.4.2"
 mlkitBarcode = "17.3.0"
 
 [libraries]
@@ -39,6 +42,9 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 androidx-camera-mlkit-vision = { group = "androidx.camera", name = "camera-mlkit-vision", version.ref = "camerax" }
 mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

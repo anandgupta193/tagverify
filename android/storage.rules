@@ -1,0 +1,16 @@
+rules_version = '2';
+// TagVerify Storage rules. Fitment photos live at certificates/{qrId}/{slot}.jpg.
+// The public certificate page shows them via download URLs (token-based).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /certificates/{qrId}/{file} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

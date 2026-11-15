@@ -41,7 +41,8 @@ service cloud.firestore {
     // Dealers see their company's QR codes and may only flip an unused one to
     // certified (linking the certificate). Everything else is admin-only.
     match /qrCodes/{qrId} {
-      allow read: if isAdmin() || (isDealer() && resource.data.companyId == myCompany());
+      // resource == null lets a dealer learn "not registered" vs "not your company".
+      allow read: if isAdmin() || (isDealer() && (resource == null || resource.data.companyId == myCompany()));
       allow create, delete: if isAdmin();
       allow update: if isAdmin() || (
         isDealer()

@@ -29,7 +29,10 @@ import com.anand.tagverify.auth.AuthViewModel
 import com.anand.tagverify.auth.AppUser
 import com.anand.tagverify.auth.GoogleSignIn
 import com.anand.tagverify.scan.ScanResult
-import com.anand.tagverify.scan.ScanResultScreen
+import com.anand.tagverify.scan.ScanOutcomeScreen
+import com.anand.tagverify.fitment.FitmentFormScreen
+import com.anand.tagverify.fitment.FitmentViewModel
+import com.anand.tagverify.fitment.VerifyScreen
 import com.anand.tagverify.scan.ScannerScreen
 import com.anand.tagverify.ui.screens.HomeScreen
 import com.anand.tagverify.ui.screens.LoginScreen
@@ -71,6 +74,8 @@ private fun SignedInNav(user: AppUser, authViewModel: AuthViewModel) {
     val scope = rememberCoroutineScope()
     // Last scanned QR, kept across the scanner -> result hop and rotation.
     var lastScan by rememberSaveable(stateSaver = scanResultSaver) { mutableStateOf<ScanResult?>(null) }
+    // One fitment form at a time, shared by the form and verify screens.
+    val fitmentViewModel: FitmentViewModel = viewModel()
     NavHost(navController = nav, startDestination = "home") {
         composable("home") {
             HomeScreen(
@@ -97,17 +102,39 @@ private fun SignedInNav(user: AppUser, authViewModel: AuthViewModel) {
                 onBack = { nav.popBackStack() },
             )
         }
+        // Scan → look up the QR → fitment form / "already certified" / "not yours".
         composable("result") {
             val result = lastScan
             if (result == null) {
                 LaunchedEffect(Unit) { nav.popBackStack("home", inclusive = false) }
             } else {
-                ScanResultScreen(
-                    result = result,
+                ScanOutcomeScreen(
+                    scan = result,
+                    myCompanyId = if (user.role == com.anand.tagverify.auth.Role.ADMIN) null else user.companyId,
+                    onReady = { qr ->
+                        fitmentViewModel.start(qr)
+                        nav.navigate("fitment") { popUpTo("result") { inclusive = true } }
+                    },
                     onScanAgain = { nav.navigate("scan") { popUpTo("result") { inclusive = true } } },
-                    onDone = { nav.popBackStack("home", inclusive = false) },
+                    onHome = { nav.popBackStack("home", inclusive = false) },
                 )
             }
+        }
+        composable("fitment") {
+            FitmentFormScreen(
+                viewModel = fitmentViewModel,
+                onBack = { nav.popBackStack("home", inclusive = false) },
+                onReview = { nav.navigate("verify") },
+            )
+        }
+        composable("verify") {
+            VerifyScreen(
+                viewModel = fitmentViewModel,
+                dealerEmail = user.email,
+                dealerName = user.name,
+                onEdit = { nav.popBackStack() },
+                onDone = { nav.popBackStack("home", inclusive = false) },
+            )
         }
     }
 }

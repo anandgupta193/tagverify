@@ -12,6 +12,7 @@ object Collections {
     const val CERTIFICATES = "certificates"
     const val MASTERS = "masters"
     const val COUNTERS = "counters"
+    const val PUBLIC_CERTIFICATES = "publicCertificates"
 }
 
 object UserFields {

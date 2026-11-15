@@ -59,25 +59,37 @@ One printed sticker. `qrId` is the human code, for example `TV-000201`. The QR i
 To reprint a torn sticker, regenerate the image for the same `qrId`. Nothing in the database changes.
 
 ### `certificates/{certificateId}`
-Created by a dealer after scanning an `unused` QR and filling in the form.
+Created by a dealer (or admin) after scanning an `unused` QR and submitting the fitment form. The same batch write also sets the QR to `certified` and writes `publicCertificates/{qrId}`.
 
 | Field | Type |
 |---|---|
-| `qrId`, `companyId`, `dealerEmail` | string |
-| `vehicle` | map: make, model, category, mfgYear, passingRto, registeredRto, vehicleSerialNo, chassisNo (5 digits), engineNo (5 digits) |
+| `certificateNo` | string, e.g. `CG2611150000005K7QX` (state + yyMMdd + serial + random) |
+| `qrId`, `qrSerial`, `companyId`, `companyName`, `state`, `productType` | |
+| `dealerEmail`, `dealerName` | string |
+| `vehicle` | map: make, category, fuelType, passingRto, registrationRto, series, vehicleNumber (regRto + series), mfgYear, chassisNo (5 characters), engineNo (5 characters) |
 | `owner` | map: name, mobile |
-| `imageUrls` | map: front, back, numberPlate, rc |
-| `pdfUrl` | string |
-| `createdAt` | timestamp |
+| `generatedAt` | map: address, lat, lng (GPS, mandatory) |
+| `imageUrls` | map: frontLeft, backRight, numberPlate, rcCopy (Storage download URLs) |
+| `copNumber`, `copValidity` | copied from the company |
+| `validFrom`, `validTill` | timestamp (+1 year) |
+| `pdfUrl` | string (empty until PDF generation is added) |
+| `createdAt` | server timestamp |
+
+Photos are stored at `certificates/{qrId}/{slot}.jpg` in Firebase Storage (rules: `android/storage.rules`). Each is compressed to at most 1600 px, JPEG 80%.
 
 ### `publicCertificates/{qrId}`
-The **public** view shown when anyone scans a sticker (`/c/{qrId}` on the web app). It's readable by everyone, so it holds **no personal data**. It's written when a QR is certified.
+The **public** view shown when anyone scans a sticker (`/c/{qrId}` on the web app). Everyone can read it, so the owner's mobile number is masked.
 
 | Field | Type |
 |---|---|
-| `qrId`, `companyName`, `productType` | string |
+| `qrId`, `qrSerial`, `certificateNo`, `companyName`, `state`, `productType` | |
+| `copNumber`, `copValidity` | |
+| `vehicle` | same map as on the certificate |
+| `ownerName`, `ownerMobileMasked` (`******0809`) | string |
+| `generatedAt` | map: address, lat, lng |
+| `imageUrls` | map of the 4 photo URLs |
+| `certifiedAt`, `validFrom`, `validTill` | timestamp |
 | `pdfUrl` | string |
-| `certifiedAt` | timestamp |
 
 ### `counters/qrSerial`
 `{ next: number }`. The admin panel reads and increments it in a transaction when generating a batch, so serials never repeat.

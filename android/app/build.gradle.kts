@@ -61,6 +61,11 @@ dependencies {
     implementation(libs.androidx.camera.mlkit.vision)
     implementation(libs.mlkit.barcode.scanning)
 
+    // Fitment form: GPS location + photo thumbnails
+    implementation(libs.play.services.location)
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.exifinterface)
+
     // Google sign-in via Credential Manager
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)

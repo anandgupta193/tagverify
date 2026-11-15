@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 /** Shows what the scanned QR code contains. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScanResultScreen(result: ScanResult, onScanAgain: () -> Unit, onDone: () -> Unit) {
+fun ScanResultScreen(result: ScanResult, onScanAgain: () -> Unit, onDone: () -> Unit, notice: String? = null) {
     val context = LocalContext.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
@@ -73,6 +74,17 @@ fun ScanResultScreen(result: ScanResult, onScanAgain: () -> Unit, onDone: () -> 
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            notice?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.errorContainer, MaterialTheme.shapes.medium)
+                        .padding(14.dp),
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(
                     Icons.Filled.CheckCircle,
